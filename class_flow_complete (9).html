@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#a9dfff">
+<title>کلاس فِلو | Class Flow</title>
+<style>
+:root{
+  --sky:#a9dcff; --sky2:#eaf8ff; --green:#41bf91; --green2:#dff8ee;
+  --orange:#ff765c; --orange2:#ffe2da; --ink:#26364a; --muted:#718096;
+  --card:rgba(255,255,255,.93); --line:#dce8ef; --yellow:#ffe47a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Tahoma,"Segoe UI",system-ui,sans-serif;background:linear-gradient(#9fd7ff,#eaf8ff);color:var(--ink)}
+button,input{font:inherit}
+button{touch-action:manipulation}
+body{overflow-x:hidden}
+.app{width:min(100%,540px);min-height:100vh;margin:auto;padding:14px 12px 24px;position:relative}
+.scene{position:fixed;inset:0;z-index:-2;overflow:hidden;background:linear-gradient(180deg,#a9dcff 0%,#dff4ff 62%,#a9dda4 100%)}
+.sun{position:absolute;width:105px;height:105px;border-radius:50%;background:#ffe8a6;right:8%;top:7%;box-shadow:0 0 50px rgba(255,224,120,.6)}
+.cloud{position:absolute;width:145px;height:42px;background:rgba(255,255,255,.68);border-radius:999px}
+.cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}
+.cloud:before{width:66px;height:66px;right:25px;top:-30px}.cloud:after{width:54px;height:54px;right:72px;top:-20px}
+.c1{top:17%;left:-45px}.c2{top:34%;right:-50px;transform:scale(.8)}.c3{top:65%;left:-60px;transform:scale(.65)}
+.kite{position:absolute;left:8%;top:14%;font-size:42px;transform:rotate(-12deg)}
+.grass{position:absolute;bottom:0;left:0;right:0;height:25%;background:linear-gradient(180deg,rgba(90,190,100,.15),rgba(61,164,76,.42));clip-path:ellipse(75% 58% at 50% 100%)}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.9);border-radius:25px;box-shadow:0 14px 38px rgba(61,108,140,.15);padding:20px}
+.hidden{display:none!important}
+.center{text-align:center}
+.logo{font-size:48px;line-height:1;margin:2px 0 8px}
+h1{margin:0;color:#39a984;font-size:31px}.latin{font-weight:900;color:#ef6e55;font-size:15px;letter-spacing:.5px}
+.subtitle{color:var(--muted);font-size:14px;line-height:1.9}
+.credit{margin-top:18px;background:#f7fafc;border:1px solid #edf2f6;border-radius:17px;padding:13px}
+.credit small{display:block;color:var(--muted);margin-bottom:4px}.credit strong{font-size:16px}
+label{display:block;color:var(--muted);font-size:13px;margin:15px 0 7px}
+input{width:100%;border:1px solid #d7e4eb;border-radius:15px;padding:13px 14px;text-align:center;background:#fff;outline:none}
+input:focus{border-color:#54bea0;box-shadow:0 0 0 4px rgba(84,190,160,.12)}
+.primary{width:100%;border:0;border-radius:16px;padding:14px 18px;margin-top:15px;background:var(--orange);color:#fff;font-weight:900;box-shadow:0 5px 0 #df5b45}
+.primary:active{transform:translateY(2px);box-shadow:0 3px 0 #df5b45}
+.secondary{border:1px solid var(--line);background:#fff;border-radius:13px;padding:10px 14px;color:#596b7d;font-weight:800}
+.help{margin-top:16px;background:rgba(255,255,255,.7);border-radius:15px;padding:11px;color:#64748b;font-size:12px;line-height:1.9}
+.topbar{display:grid;grid-template-columns:1.35fr .7fr .7fr;gap:7px;margin-bottom:10px}
+.pill{background:rgba(255,255,255,.92);border-radius:16px;padding:8px;text-align:center;font-size:11px;font-weight:800;min-width:0}
+.pill span{display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pill b{display:block;color:var(--orange);font-size:16px;margin-top:2px}
+.game-card{padding:14px}
+.levelline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}.leveltitle{font-weight:900}.next{font-size:13px;color:var(--muted)}.next b{font-size:20px;color:var(--orange)}
+.progress{height:9px;background:#edf2f5;border-radius:99px;overflow:hidden;margin-bottom:12px}.progress i{display:block;height:100%;width:0;background:var(--green);border-radius:99px;transition:.25s}
+.board{display:grid;gap:7px;padding:8px;background:rgba(245,249,251,.86);border:1px solid #e0e9ee;border-radius:20px;max-width:455px;margin:auto}
+.cell{aspect-ratio:1;border:1px solid #dce5ea;border-radius:12px;background:#f9fbfc;color:#5d6c7c;font-weight:900;font-size:clamp(17px,6vw,29px);box-shadow:0 2px 0 #d8e1e6}
+.cell.blank{background:#fffdf0;border:2px solid #55bfa1;box-shadow:0 0 0 3px rgba(255,228,122,.18)}
+.cell.fixed{background:#f5f7f8}
+.cell.selected{outline:3px solid #49b6d9;outline-offset:1px;background:#fff9bd}
+.cell.correct{background:var(--green2);color:#15946d;border-color:#49bd94}
+.cell.wrong{animation:shake .2s linear 2;background:#ffe1dc;border-color:#ef806d}
+@keyframes shake{25%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
+.instruction{margin:12px 2px 8px;background:rgba(255,255,255,.78);border-radius:15px;padding:10px;text-align:center;color:#5e6e80;font-size:12px}
+.choices{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:430px;margin:auto}
+.choice{border:0;border-radius:50%;aspect-ratio:1;background:var(--orange);color:#fff;font-size:20px;font-weight:900;box-shadow:0 4px 0 #df5b45}
+.choice:active{transform:translateY(2px);box-shadow:0 2px 0 #df5b45}.choice.used{opacity:.42}
+.overlay{position:fixed;inset:0;background:rgba(29,49,66,.48);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20;backdrop-filter:blur(5px)}
+.modal{width:min(100%,440px);background:#fff;border-radius:25px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center}
+.stars{font-size:39px;letter-spacing:5px;color:#f2c900;margin:5px 0 12px}
+.modal h2{margin:0;color:#35ad83;font-size:25px}.modal p{color:#617083;line-height:1.9;font-size:13px}.modal button{width:100%}
+.report-head .emoji{font-size:45px}.report-head h2{margin:2px 0;color:#3aa985}.report-head p{color:var(--muted);margin:5px 0 16px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}.stat{border:1px solid #e3ebef;background:#f8fbfc;border-radius:16px;padding:13px;text-align:center}.stat strong{display:block;font-size:23px;color:#32a881;margin:3px 0}.stat small{color:var(--muted)}
+.feedback{margin-top:12px;padding:13px;border-radius:16px;background:#edf9f5;color:#4d6573;line-height:1.9;text-align:center;font-size:13px}
+.report-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.report-actions button{margin:0}
+.badge{display:inline-block;background:#fff2cd;color:#8a6a13;padding:5px 9px;border-radius:99px;font-size:11px;font-weight:900}
+@media(max-width:360px){.app{padding-left:8px;padding-right:8px}.card{padding:16px}.topbar{gap:5px}.pill{padding:7px 4px}.choices{gap:6px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="scene"><div class="sun"></div><div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="kite">🪁</div><div class="grass"></div></div>
+
+<main class="app">
+<section id="startScreen" class="card">
+  <div class="center">
+    <div class="logo">☁️</div>
+    <h1>کلاس فِلو</h1>
+    <div class="latin">CLASS FLOW</div>
+    <p class="subtitle">بازی آموزشی توجه، دقت و سرعت پاسخ‌گویی</p>
+  </div>
+  <div class="credit"><small>طراح</small><strong>رضامهرعلی تبارفیروزجاه</strong></div>
+  <label for="playerName">نام دانش‌آموز</label>
+  <input id="playerName" maxlength="30" placeholder="نام خود را وارد کنید">
+  <button id="startBtn" class="primary">شروع بازی 🎮</button>
+  <div class="help">در هر مرحله چند خانه خالی است. یک خانه را انتخاب کن، سپس عدد مناسب را از پایین صفحه انتخاب کن. ابتدا مراحل ۴×۴ و سپس مراحل ۵×۵ نمایش داده می‌شوند.</div>
+</section>
+
+<section id="gameScreen" class="hidden">
+  <div class="topbar">
+    <div class="pill"><span>دانش‌آموز</span><b id="topName">—</b></div>
+    <div class="pill"><span>مرحله</span><b id="topLevel">۱</b></div>
+    <div class="pill"><span>امتیاز</span><b id="topScore">۰</b></div>
+  </div>
+  <div class="card game-card">
+    <div class="levelline">
+      <div class="leveltitle" id="sizeTitle">جدول ۴×۴</div>
+      <div class="next">خانه انتخابی: <b id="selectedText">—</b></div>
+    </div>
+    <div class="progress"><i id="progressBar"></i></div>
+    <div id="board" class="board"></div>
+    <div class="instruction" id="instruction">یک خانه خالی را لمس کن و سپس عدد مناسب را انتخاب کن.</div>
+    <div id="choices" class="choices"></div>
+  </div>
+</section>
+
+<section id="reportScreen" class="card hidden">
+  <div class="center report-head">
+    <div class="emoji">🎉</div>
+    <h2>گزارش عملکرد</h2>
+    <p id="reportIntro"></p>
+    <span class="badge" id="reportBadge">پایان بازی</span>
+  </div>
+  <div class="stats">
+    <div class="stat">تلاش‌های درست<strong id="correctOut">۰</strong><small>پاسخ صحیح</small></div>
+    <div class="stat">تلاش‌های اشتباه<strong id="wrongOut">۰</strong><small>خطا</small></div>
+    <div class="stat">امتیاز کل<strong id="scoreOut">۰</strong><small>امتیاز</small></div>
+    <div class="stat">زمان کل<strong id="timeOut">۰</strong><small>ثانیه</small></div>
+    <div class="stat">دقت<strong id="accuracyOut">۰٪</strong><small>درصد</small></div>
+    <div class="stat">سرعت پاسخ<strong id="speedOut">۰</strong><small>ثانیه/خانه</small></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="report-actions">
+    <button id="replayBtn" class="primary">بازی دوباره 🔄</button>
+    <button id="newPlayerBtn" class="secondary">دانش‌آموز جدید</button>
+  </div>
+</section>
+</main>
+
+<div id="levelModal" class="overlay hidden" aria-modal="true" role="dialog">
+  <div class="modal">
+    <div class="stars" id="modalStars">★★★</div>
+    <h2 id="modalTitle">آفرین!</h2>
+    <p id="modalText">این مرحله را با موفقیت تمام کردی.</p>
+    <button id="nextLevelBtn" class="primary">مرحله بعد</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const fa = n => Number(n).toLocaleString("fa-IR");
+  const state = {
+    name:"", level:1, maxLevel:10, size:4, board:[], selected:null,
+    correct:0, wrong:0, score:0, totalTime:0, levelStart:0, cellStart:0,
+    audio:null, musicTimer:null, musicOn:true
+  };
+
+  function shuffle(arr){
+    const a=arr.slice();
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+    return a;
+  }
+
+  function playTone(freq,duration=.09,type="sine",gain=.035){
+    try{
+      if(!state.audio) state.audio=new (window.AudioContext||window.webkitAudioContext)();
+      const ctx=state.audio;
+      if(ctx.state==="suspended") ctx.resume();
+      const osc=ctx.createOscillator(), g=ctx.createGain();
+      osc.type=type; osc.frequency.value=freq; g.gain.value=gain;
+      osc.connect(g);g.connect(ctx.destination);osc.start();
+      g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+duration);
+      osc.stop(ctx.currentTime+duration);
+    }catch(e){}
+  }
+
+  function startMusic(){
+    if(!state.musicOn)return;
+    stopMusic();
+    const notes=[392,440,523,659,523,440,494,587];
+    let i=0;
+    state.musicTimer=setInterval(()=>{playTone(notes[i++%notes.length],.16,"sine",.012)},520);
+  }
+  function stopMusic(){if(state.musicTimer){clearInterval(state.musicTimer);state.musicTimer=null}}
+
+  function show(id){
+    ["startScreen","gameScreen","reportScreen"].forEach(x=>$(x).classList.add("hidden"));
+    $(id).classList.remove("hidden");
+  }
+
+  function makeBoard(){
+    state.size = state.level<=5 ? 4 : 5;
+    const total=state.size*state.size;
+    const values=shuffle(Array.from({length:total},(_,i)=>((i%state.size)+1)));
+    // Every cell has a hidden correct answer from 1..size; a subset is left blank.
+    state.board=values.map((v,i)=>({value:v,blank:false,filled:false}));
+    const blankCount=state.size===4 ? 5 + Math.min(2,state.level-1) : 8 + Math.min(3,state.level-6);
+    shuffle(Array.from({length:total},(_,i)=>i)).slice(0,blankCount).forEach(i=>state.board[i].blank=true);
+    state.selected=null;
+    state.levelStart=performance.now();
+    state.cellStart=performance.now();
+    renderBoard();
+  }
+
+  function renderBoard(){
+    $("topName").textContent=state.name;
+    $("topLevel").textContent=fa(state.level);
+    $("topScore").textContent=fa(state.score);
+    $("sizeTitle").textContent="جدول "+fa(state.size)+"×"+fa(state.size);
+    const board=$("board");
+    board.style.gridTemplateColumns=`repeat(${state.size},1fr)`;
+    board.innerHTML="";
+    state.board.forEach((cell,i)=>{
+      const b=document.createElement("button");
+      b.type="button"; b.className="cell";
+      if(cell.blank && !cell.filled){b.classList.add("blank");b.textContent=state.selected===i?"؟":""}
+      else{b.classList.add("fixed");b.textContent=fa(cell.value)}
+      if(state.selected===i)b.classList.add("selected");
+      b.addEventListener("click",()=>selectCell(i));
+      board.appendChild(b);
+    });
+    renderChoices();
+    updateProgress();
+  }
+
+  function renderChoices(){
+    const wrap=$("choices"); wrap.innerHTML="";
+    for(let n=1;n<=state.size;n++){
+      const b=document.createElement("button");b.type="button";b.className="choice";b.textContent=fa(n);
+      if(!state.selected===null){}
+      b.addEventListener("click",()=>chooseNumber(n));
+      wrap.appendChild(b);
+    }
+    $("selectedText").textContent=state.selected===null?"—":"خانه "+fa(state.selected+1);
+  }
+
+  function selectCell(i){
+    const cell=state.board[i];
+    if(!cell.blank || cell.filled)return;
+    state.selected=i; state.cellStart=performance.now();
+    $("instruction").textContent="حالا عدد مناسب را از پایین انتخاب کن.";
+    playTone(520,.06);
+    renderBoard();
+  }
+
+  function chooseNumber(n){
+    if(state.selected===null){
+      $("instruction").textContent="اول یک خانه خالی را انتخاب کن.";
+      playTone(180,.08,"square"); return;
+    }
+    const i=state.selected, cell=state.board[i];
+    if(!cell.blank || cell.filled)return;
+    if(n===cell.value){
+      cell.filled=true; state.correct++;
+      const response=(performance.now()-state.cellStart)/1000;
+      const bonus=Math.max(1,Math.round(12-response*2));
+      state.score+=10+bonus;
+      playTone(720,.08); setTimeout(()=>playTone(920,.08),70);
+      state.selected=null;
+      $("instruction").textContent="آفرین! خانه بعدی را انتخاب کن.";
+      renderBoard();
+      if(state.board.every(c=>!c.blank || c.filled)) setTimeout(levelComplete,350);
+    }else{
+      state.wrong++; state.score=Math.max(0,state.score-2);
+      $("instruction").textContent="عدد انتخاب‌شده درست نیست؛ دوباره تلاش کن.";
+      playTone(170,.1,"square");
+      const el=$("board").children[i]; if(el){el.classList.add("wrong");setTimeout(()=>el.classList.remove("wrong"),300)}
+      $("topScore").textContent=fa(state.score);
+    }
+  }
+
+  function updateProgress(){
+    const total=state.board.filter(c=>c.blank).length;
+    const done=state.board.filter(c=>c.blank&&c.filled).length;
+    $("progressBar").style.width=(total?done/total*100:100)+"%";
+  }
+
+  function levelComplete(){
+    state.totalTime += (performance.now()-state.levelStart)/1000;
+    const errors=state.wrong;
+    const stars=errors===0?3:(errors<=2?2:1);
+    $("modalStars").textContent="★".repeat(stars)+"☆".repeat(3-stars);
+    $("modalTitle").textContent=stars===3?"عالی بود!":stars===2?"آفرین!":"مرحله را کامل کردی!";
+    $("modalText").textContent="مرحله "+fa(state.level)+" را با موفقیت تمام کردی. آماده مرحله بعدی هستی؟";
+    $("nextLevelBtn").textContent=state.level<state.maxLevel?"مرحله بعد":"نمایش گزارش عملکرد";
+    $("levelModal").classList.remove("hidden");
+  }
+
+  $("nextLevelBtn").addEventListener("click",()=>{
+    $("levelModal").classList.add("hidden");
+    if(state.level<state.maxLevel){state.level++;makeBoard()}
+    else finishGame();
+  });
+
+  function finishGame(){
+    stopMusic();
+    show("reportScreen");
+    const totalAttempts=state.correct+state.wrong;
+    const accuracy=totalAttempts?Math.round(state.correct/totalAttempts*100):0;
+    const speed=state.correct?state.totalTime/state.correct:0;
+    $("reportIntro").textContent=state.name+"، این گزارش عملکرد فعالیت‌های تو در کلاس فِلو است.";
+    $("correctOut").textContent=fa(state.correct);
+    $("wrongOut").textContent=fa(state.wrong);
+    $("scoreOut").textContent=fa(state.score);
+    $("timeOut").textContent=state.totalTime.toFixed(1);
+    $("accuracyOut").textContent=fa(accuracy)+"٪";
+    $("speedOut").textContent=speed.toFixed(1);
+    let msg;
+    if(accuracy>=90) msg="تمرکز و دقتت خیلی خوب بود. 🌟 اگر همین روند را ادامه بدهی، سرعت پاسخ‌گویی هم بهتر می‌شود.";
+    else if(accuracy>=75) msg="عملکردت خوب بود. با چند نوبت تمرین می‌توانی خطاها را کمتر و سرعت را بیشتر کنی. 💪";
+    else msg="تمرین بیشتر می‌تواند به افزایش دقت و کاهش خطاها کمک کند. مهم این است که هر بار بهتر از قبل شوی. 🌱";
+    $("feedback").textContent=msg;
+  }
+
+  function begin(){
+    const n=$("playerName").value.trim();
+    state.name=n||"دانش‌آموز";
+    state.level=1;state.score=0;state.correct=0;state.wrong=0;state.totalTime=0;
+    show("gameScreen"); startMusic(); makeBoard();
+  }
+
+  $("startBtn").addEventListener("click",begin);
+  $("playerName").addEventListener("keydown",e=>{if(e.key==="Enter")begin()});
+
+  $("replayBtn").addEventListener("click",()=>{
+    state.level=1;state.score=0;state.correct=0;state.wrong=0;state.totalTime=0;
+    show("gameScreen");startMusic();makeBoard();
+  });
+
+  $("newPlayerBtn").addEventListener("click",()=>{
+    stopMusic();$("playerName").value="";show("startScreen");$("playerName").focus();
+  });
+
+  // Prevent accidental page zoom from double-tap on game controls.
+  let lastTouch=0;
+  document.addEventListener("touchend",e=>{
+    const now=Date.now(); if(now-lastTouch<280)e.preventDefault(); lastTouch=now;
+  },{passive:false});
+})();
+</script>
+</body>
+</html>
